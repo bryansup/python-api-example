@@ -127,11 +127,73 @@ class AddRecord(Resource):
         else:
             return {"message": "Failed to add record"}, 500
         
-
+class StringGenerator(Resource):
+    def get(self):
+        """
+        This method responds to the GET request for this endpoint and returns the data in uppercase.
+        ---
+        tags:
+        - Text Processing
+        parameters:
+            - name: message
+              in: query
+              type: string
+              required: true
+              description: The text to be converted to uppercase dude!
+            - name: duplication_factor
+              in: query
+              type: integer
+              required: false
+              description: number of times to duplicates the text (default is 1)
+            - name: capitalization
+              in: query
+              type: string
+              required: false     
+              enum: [UPPER, LOWER]
+              description: Capitalization style UPPER, LOWER, or None (default)
+        responses:
+            200:
+                description: A successful GET request
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                            generated_text:
+                                type: string
+                                description: The generated text
+        """
+        
+        args = request.args
+        message = args["message"]
+        
+        duplication_factor = int(args.get("duplication_factor",1))
+        capitalization = args.get("capitalization", None)
+        
+        if capitalization == "UPPER":
+            message = message.upper()
+        elif capitalization == "LOWER":
+            message = message.lower()
+        generated_text = (message + " ") * duplication_factor
+        return {"generated_text": generated_text}, 200
 
 api.add_resource(AddRecord, "/add-record")
 api.add_resource(Records, "/records")
 api.add_resource(UppercaseText, "/uppercase")
+api.add_resource(StringGenerator,"/generator")
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+#
+#In this code, we have a Flask application with a RESTful API. The application has four endpoints: `/generate`, `/uppercase`, `/records`, and `/add-record`. Each endpoint corresponds to a different resource in the `resources` module.
+#
+#The `StringGenerator` resource handles the `/generate` endpoint. It takes a message and optional parameters for duplication factor and capitalization style. The message is then processed according to the provided parameters and returned as a generated text.
+#
+#The `UppercaseText` resource handles the `/uppercase` endpoint. It takes a text and converts it to uppercase.
+#
+#The `Records` resource handles the `/records` endpoint. It retrieves a specified number of books from the database and returns them as a list of dictionaries.
+#
+#The `AddRecord` resource handles the `/add-record` endpoint. It takes a JSON object containing a book and a rating, and adds a new record to the database.
+#
+#The `flasgger` module is used
